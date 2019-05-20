@@ -1,28 +1,36 @@
 package main
 
 import (
-	"github.com/chanhung34/todo_list/helper"
-	"github.com/chanhung34/todo_list/model"
+	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/sirupsen/logrus"
 	"log"
-	"net/http"
+	"todo_list/handler"
 )
 
 func main() {
 	r := gin.Default()
-	r.POST("/testing", userRegister)
+	gorm, err := GORMInit()
+	logger := logrus.New()
+	logger.SetFormatter(&logrus.JSONFormatter{})
+	// routing
+	userHandler := handler.NewUser(logger, context.Background(), gorm)
+	r.POST("/register", userHandler.Register)
 
-	err := r.Run()
+	err = r.Run()
 	if err != nil {
-		log.Println(err.Error())
+		fmt.Println(err.Error())
 	}
 }
-
-func userRegister(c *gin.Context) {
-	var urr model.UserRegisterRequest
-	if c.ShouldBind(urr) != nil {
-		c.String(http.StatusOK, helper.INVALID_INPUT_REQUEST_MSG)
+func GORMInit() (*gorm.DB, error) {
+	//todo: Setup env config and use .env file when config empty
+	db, err := gorm.Open("mysql", "user:password@tcp(127.0.0.1:3306)/db?charset=utf8&parseTime=True")
+	if err != nil {
+		log.Fatal(err.Error())
+		return nil, err
 	}
-
-
+	return db, err
 }

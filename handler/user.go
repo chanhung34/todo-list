@@ -33,14 +33,14 @@ func NewUser(logger logrus.Logger, ctx context.Context, db *gorm.DB) *commonUser
 func (handler *commonUser) Register(c *gin.Context) {
 	var urr model.UserRegisterRequest
 	if err := c.ShouldBindJSON(&urr); err != nil {
-		c.JSON(http.StatusBadRequest, model.UserRegisterResponse{IsError: true, ErrorMessage: err.Error()})
+		c.JSON(http.StatusBadRequest, model.UserRegisterResponse{IsError: true, Message: err.Error()})
 		return
 	}
 	accountStorage := storage.NewCustomerStorage(handler.gormDB, handler.logger)
 	accountRepository := repository.NewAccountRepository(accountStorage, handler.logger)
 	account, err := accountRepository.SignUp(context.Background(), &model.Account{UserName: urr.UserName, Password: urr.Password})
 	if err != nil {
-		c.JSON(http.StatusBadRequest, model.UserRegisterResponse{IsError: true, ErrorMessage: err.Error()})
+		c.JSON(http.StatusBadRequest, model.UserRegisterResponse{IsError: true, Message: err.Error()})
 	} else {
 		c.JSON(http.StatusOK, model.UserRegisterResponse{Data: model.UserRegisterResponseData{UserName: account.UserName,
 			Password: account.Password, AccessToken: "access token"}})

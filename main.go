@@ -19,6 +19,11 @@ func main() {
 	// routing
 	userHandler := handler.NewUser(*logger, context.Background(), gorm)
 	r.POST("/register", userHandler.Register)
+	r.POST("/auth", userHandler.Register)
+	r.POST("/todo_items/create", userHandler.Register)
+	r.PUT("/todo_items/update", userHandler.Register)
+	r.GET("/todo_items/list/:user_id/:page", userHandler.Register)
+	r.DELETE("/todo_items/delete/:user_id", userHandler.Register)
 
 	err = r.Run()
 	if err != nil {

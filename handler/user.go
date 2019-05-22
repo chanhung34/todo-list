@@ -7,6 +7,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"todo_list/model"
+	"todo_list/repository"
+	"todo_list/storage"
 )
 
 type User interface {
@@ -15,12 +17,12 @@ type User interface {
 }
 
 type commonUser struct {
-	logger *logrus.Logger
+	logger logrus.Logger
 	ctx    *context.Context
 	gormDB *gorm.DB
 }
 
-func NewUser(logger *logrus.Logger, ctx context.Context, db *gorm.DB) *commonUser {
+func NewUser(logger logrus.Logger, ctx context.Context, db *gorm.DB) *commonUser {
 	return &commonUser{
 		logger: logger,
 		ctx:    &ctx,
@@ -34,11 +36,14 @@ func (handler *commonUser) Register(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, model.UserRegisterResponse{IsError: true, ErrorMessage: err.Error()})
 		return
 	}
-	if urr.UserName != "hungvtc" || urr.Password != "123abc" {
-		c.JSON(http.StatusOK, model.UserRegisterResponse{IsError: true, ErrorMessage: "fail to authorized"})
-		return
+	accountStorage := storage.NewCustomerStorage(handler.gormDB, handler.logger)
+	accountRepository := repository.NewAccountRepository(accountStorage, handler.logger)
+	account, err := accountRepository.SignUp(context.Background(), &model.Account{UserName: urr.UserName, Password: urr.Password})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, model.UserRegisterResponse{IsError: true, ErrorMessage: err.Error()})
+	} else {
+		c.JSON(http.StatusOK, model.UserRegisterResponse{Data: model.UserRegisterResponseData{UserName: account.UserName,
+			Password: account.Password, AccessToken: "access token"}})
 	}
-	//logger := log.N
-	//l\
-	c.JSON(http.StatusOK, model.UserRegisterResponse{Data: model.UserRegisterResponseData{"ahihi", "passwordd", "access token"}})
+
 }

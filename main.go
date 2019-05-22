@@ -17,7 +17,7 @@ func main() {
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.JSONFormatter{})
 	// routing
-	userHandler := handler.NewUser(logger, context.Background(), gorm)
+	userHandler := handler.NewUser(*logger, context.Background(), gorm)
 	r.POST("/register", userHandler.Register)
 
 	err = r.Run()

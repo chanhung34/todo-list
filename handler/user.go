@@ -47,3 +47,21 @@ func (handler *commonUser) Register(c *gin.Context) {
 	}
 
 }
+
+func (handler *commonUser) Auth(c *gin.Context) {
+	var uar model.UserAuthRequest
+	if err := c.ShouldBindJSON(&uar); err != nil {
+		c.JSON(http.StatusBadRequest, model.UserAuthResponse{IsError: true, Message: err.Error()})
+		return
+	}
+	accountStorage := storage.NewCustomerStorage(handler.gormDB, handler.logger)
+	accountRepository := repository.NewAccountRepository(accountStorage, handler.logger)
+	account, err := accountRepository.Auth(context.Background(), &model.Account{UserName: urr.UserName, Password: urr.Password})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, model.UserAuthResponse{IsError: true, Message: err.Error()})
+	} else {
+		c.JSON(http.StatusOK, model.UserAuthResponse{Data: model.UserAuthResponse{UserName: account.UserName,
+			Password: account.Password, AccessToken: "access token"}})
+	}
+
+}

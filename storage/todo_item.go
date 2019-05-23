@@ -3,27 +3,49 @@ package storage
 import "todo_list/model"
 
 type TodoItemStorage interface {
-	UpdateTodoItem(userId int, item *model.TodoItem) (*model.TodoItem, error)
+	UpdateTodoItem(item *model.TodoItem) (*model.TodoItem, error)
 	CreateTodoItem(item *model.TodoItem) (*model.TodoItem, error)
 	GetTodoItemById(itemId int) (*model.TodoItem, error)
 	GetTodoItemsByUserId(itemId int, page int, limit int) ([]*model.TodoItem, error)
 	DeleteTodoItem(itemId int) error
 }
 type todoItem struct {
+	db     *gorm.DB
+	logger logrus.Logger
 }
 
-func (storage *todoItem) UpdateTodoItem(userId int, item *model.TodoItem) (*model.TodoItem, error) {
-	panic("implement me")
+func NewTodoItem(db *gorm.DB, logger logrus.Logger) *todoItem {
+	return &todoItem{
+		db:     db,
+		logger: logger,
+	}
+}
+func (storage *todoItem) UpdateTodoItem(item *model.TodoItem) (*model.TodoItem, error) {
+	err := storage.db.New().Omit("VersionNo").Update(item).Error
+	//return false, nil
+	return item, err
 }
 func (storage *todoItem) CreateTodoItem(item *model.TodoItem) (*model.TodoItem, error) {
-	panic("implement me")
+	err := storage.db.New().Omit("VersionNo").Create(item).Error
+	//return false, nil
+	return item, err
 }
 func (storage *todoItem) GetTodoItemById(itemId int) (*model.TodoItem, error) {
-	panic("implement me")
+	var item model.TodoItem
+	err := storage.db.Model(model.TodoItem{}).Where("id = ?", itemId).First(&item).Error
+	//return false, nil
+	return &item, err
 }
 func (storage *todoItem) GetTodoItemsByUserId(itemId int, page int, limit int) ([]*model.TodoItem, error) {
-	panic("implement me")
+	var items []*model.TodoItem
+	err := storage.db.Model(model.TodoItem{}).Where("id = ?", itemId).Find(&items).Error
+	//return false, nil
+	return items, err
 }
-func (storage *todoItem) DeleteTodoItem(itemId int) error {
-	panic("implement me")
+func (storage *todoItem) DeleteTodoItem(itemId int) (bool, error) {
+	err := storage.db.New().Unscoped().Delete(model.Customer{}, "id = ?", id).Error
+	if err != nil {
+		return false, err
+	}
+	return true, err
 }

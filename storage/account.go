@@ -2,26 +2,54 @@ package storage
 
 import (
 	"context"
-	"gitlab.sendo.vn/core/golang-sdk/new/logger"
-	"model"
+	"github.com/jinzhu/gorm"
+	"github.com/sirupsen/logrus"
+	"todo_list/model"
 )
 
-type CustomerStorage interface {
-	GetAccountByUserNameAndPassword(username string, password string) (*model.Account, error)
-	GetAccountByUserID(userId int) (*model.Account, error)
-	CreateAccount(customer *model.Account) (*model.Account, error)
+type Account interface {
+	Create(ctx context.Context, account *model.Account) (*model.Account, error)
+	GetByUserNameAndPassword(ctx context.Context, username string, password string) (*model.Account, error)
+	GetByUserId(ctx context.Context, userId int) (*model.Account, error)
+	ExistUserName(ctx context.Context, userName string) (bool, error)
 }
 
-type customerStorage struct {
+type accountStorage struct {
 	db     *gorm.DB
-	logger logger.Logger
-	ctx    context.Context
+	logger logrus.Logger
 }
 
-func NewCustomerStorage(db *gorm.DB, logger logger.Logger, ctx context.Context) *customerStorage {
-	return &customerStorage{
+func NewCustomerStorage(db *gorm.DB, logger logrus.Logger) *accountStorage {
+	return &accountStorage{
 		db:     db,
 		logger: logger,
-		ctx:    ctx,
 	}
+}
+func (storage accountStorage) Create(ctx context.Context, account *model.Account) (*model.Account, error) {
+	err := storage.db.New().Create(&account).Error
+	if err != nil {
+		return nil, err
+	}
+	return account, nil
+}
+
+func (storage accountStorage) ExistUserName(ctx context.Context, userName string) (bool, error) {
+	var count = 0
+	err := storage.db.Model(model.Account{}).Where("user_name = ?", userName).Count(&count).Error
+	//return false, nil
+	return count > 0, err
+}
+
+func (storage accountStorage) GetByUserNameAndPassword(ctx context.Context, username string, password string) (*model.Account, error) {
+	var user model.Account
+	err := storage.db.Model(model.Account{}).Where("user_name = ? AND password = ?", username, password).First(&user).Error
+	//return false, nil
+	return &user, err
+}
+
+func (storage accountStorage) GetByUserId(ctx context.Context, userId int) (*model.Account, error) {
+	var user *model.Account
+	err := storage.db.Model(model.Account{}).Where("id = ?", userId).First(&user).Error
+	//return false, nil
+	return user, err
 }

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/sirupsen/logrus"
@@ -43,25 +44,23 @@ func (handler *commonUser) Register(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, model.UserRegisterResponse{IsError: true, Message: err.Error()})
 	} else {
 		c.JSON(http.StatusOK, model.UserRegisterResponse{Data: model.UserRegisterResponseData{UserName: account.UserName,
-			Password: account.Password, AccessToken: "access token"}})
+			Password: account.Password}})
 	}
-
 }
 
 func (handler *commonUser) Auth(c *gin.Context) {
 	var uar model.UserAuthRequest
+	// Get the JSON body and decode into credentials
 	if err := c.ShouldBindJSON(&uar); err != nil {
 		c.JSON(http.StatusBadRequest, model.UserAuthResponse{IsError: true, Message: err.Error()})
 		return
 	}
 	accountStorage := storage.NewCustomerStorage(handler.gormDB, handler.logger)
 	accountRepository := repository.NewAccountRepository(accountStorage, handler.logger)
-	account, err := accountRepository.Auth(context.Background(), &model.Account{UserName: urr.UserName, Password: urr.Password})
+	_, err := accountRepository.Auth(c, uar.Username, uar.Password)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, model.UserAuthResponse{IsError: true, Message: err.Error()})
+		c.JSON(http.StatusBadRequest, model.UserRegisterResponse{IsError: true, Message: err.Error()})
 	} else {
-		c.JSON(http.StatusOK, model.UserAuthResponse{Data: model.UserAuthResponse{UserName: account.UserName,
-			Password: account.Password, AccessToken: "access token"}})
+		c.JSON(http.StatusOK, model.UserRegisterResponse{Message: fmt.Sprintf("welcome %s !", uar.Username)})
 	}
-
 }

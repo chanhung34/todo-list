@@ -19,7 +19,7 @@ type UserRegisterResponseData struct {
 
 // user auth
 type UserAuthRequest struct {
-	UserName string `json:"user_name" binding:"required"`
+	Username string `json:"user_name" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 type UserAuthResponse struct {
@@ -46,7 +46,6 @@ type AddTodoItemResponse struct {
 
 // Add todo-item
 type UpdateTodoItemRequest struct {
-	UserId int    `json:"user_id" binding:"required"`
 	ItemId int    `json:"item_id" binding:"required"`
 	Tittle string `json:"tittle"`
 	Status string `json:"status"`

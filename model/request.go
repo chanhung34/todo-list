@@ -46,7 +46,7 @@ type AddTodoItemResponse struct {
 // Add todo-item
 type UpdateTodoItemRequest struct {
 	ItemId int    `json:"item_id" binding:"required"`
-	Tittle string `json:"tittle"`
+	Tittle string `json:"title"`
 	Status string `json:"status"`
 }
 type UpdateTodoItemResponse struct {
@@ -57,7 +57,7 @@ type UpdateTodoItemResponse struct {
 
 // delete todo-item
 type DeleteTodoItemRequest struct {
-	UserId int `json:"user_id" binding:"required"`
+	ItemId int `json:"item_id" binding:"required"`
 }
 type DeleteTodoItemResponse struct {
 	IsError bool   `json:"is_error"`

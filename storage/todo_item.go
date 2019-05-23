@@ -1,13 +1,17 @@
 package storage
 
-import "todo_list/model"
+import (
+	"github.com/jinzhu/gorm"
+	"github.com/sirupsen/logrus"
+	"todo_list/model"
+)
 
 type TodoItemStorage interface {
 	UpdateTodoItem(item *model.TodoItem) (*model.TodoItem, error)
 	CreateTodoItem(item *model.TodoItem) (*model.TodoItem, error)
 	GetTodoItemById(itemId int) (*model.TodoItem, error)
-	GetTodoItemsByUserId(itemId int, page int, limit int) ([]*model.TodoItem, error)
-	DeleteTodoItem(itemId int) error
+	GetTodoItemsByUserId(userId int, page int, limit int) ([]*model.TodoItem, error)
+	DeleteTodoItem(itemId int) (bool, error)
 }
 type todoItem struct {
 	db     *gorm.DB
@@ -36,14 +40,14 @@ func (storage *todoItem) GetTodoItemById(itemId int) (*model.TodoItem, error) {
 	//return false, nil
 	return &item, err
 }
-func (storage *todoItem) GetTodoItemsByUserId(itemId int, page int, limit int) ([]*model.TodoItem, error) {
+func (storage *todoItem) GetTodoItemsByUserId(userId int, page int, limit int) ([]*model.TodoItem, error) {
 	var items []*model.TodoItem
-	err := storage.db.Model(model.TodoItem{}).Where("id = ?", itemId).Find(&items).Error
+	err := storage.db.Model(model.TodoItem{}).Limit(limit).Offset((page-1)*limit).Where("user_id = ?", userId).Find(&items).Error
 	//return false, nil
 	return items, err
 }
 func (storage *todoItem) DeleteTodoItem(itemId int) (bool, error) {
-	err := storage.db.New().Unscoped().Delete(model.Customer{}, "id = ?", id).Error
+	err := storage.db.New().Unscoped().Delete(model.TodoItem{}, "id = ?", itemId).Error
 	if err != nil {
 		return false, err
 	}

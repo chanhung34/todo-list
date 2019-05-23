@@ -32,9 +32,9 @@ func main() {
 		//basicAuth.Use(AuthenticationRequired())
 		//{
 		basicAuth.POST("/todo_items/create", todoItemHandler.Create)
-		basicAuth.PUT("/todo_items/update", userHandler.Register)
-		basicAuth.GET("/todo_items/list/:user_id/:page", userHandler.Register)
-		basicAuth.DELETE("/todo_items/delete/:user_id", userHandler.Register)
+		basicAuth.PUT("/todo_items/update", todoItemHandler.Update)
+		basicAuth.GET("/todo_items/list/:page", todoItemHandler.Listing)
+		basicAuth.DELETE("/todo_items/delete/:item_id", todoItemHandler.Delete)
 		//}
 	}
 

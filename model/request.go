@@ -35,7 +35,6 @@ type UserAuth struct {
 
 // Add todo-item
 type AddTodoItemRequest struct {
-	UserId int    `json:"user_id" binding:"required"`
 	Tittle string `json:"tittle" binding:"required"`
 }
 type AddTodoItemResponse struct {
@@ -67,8 +66,7 @@ type DeleteTodoItemResponse struct {
 
 // Get todo-items
 type GetTodoItemsRequest struct {
-	UserId int `json:"user_id"`
-	Page   int `json:"page"`
+	Page int `json:"page"`
 }
 type GetTodoItemsResponse struct {
 	IsError   bool        `json:"is_error"`
